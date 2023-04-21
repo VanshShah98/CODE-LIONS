@@ -1,23 +1,36 @@
-// App.js
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import EmergencyContacts from './components/EmergencyContacts1';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View} from 'react-native';
+//import EmergencyContacts_Shre from './components/EmergencyContact_Shre';
 import PanicButton from './components/PanicButton';
 import axios from 'axios';
-import Geolocation from '@react-native-community/geolocation';
-import EmergencyContacts1 from './components/EmergencyContact';
+
+//const backgroundImage = require("./Code.png");
 
 export default function App() {
+  const [location, setLocation] = useState("");
+
+  useEffect(() => {
+    // Get the user's location based on their IP address
+    const apiUrl = "https://ipgeolocation.abstractapi.com/v1/?api_key=";
+    axios.get(apiUrl)
+      .then(response => {
+        setLocation(response.data.city + ", " + response.data.region +",Longitude:"+ response.data.longitude+", Latitude:"+ response.data.latitude);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
+
   const sendMessage = (body, to) => {
     // Send an SMS message using the SMS API
-    axios.post('https://api.twilio.com/2010-04-01/Accounts/AC28506daa05d311be29e7d6266e300df7/Messages.json', {
+    axios.post('https://api.twilio.com/2010-04-01/Accounts/SDI/Messages.json', {
       Body: body,
       To: to,
-      From: '+16204450267',
+      From: 'YOUR PHN Number',
     }, {
       auth: {
-        username: 'AC28506daa05d311be29e7d6266e300df7',
-        password: '11e16f88f6dd11cc36dca4c7cdb7d560',
+        username: 'YOUR_SID',
+        password: 'YOUR_PASS',
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -30,52 +43,38 @@ export default function App() {
   };
 
   const getCurrentLocation = () => {
-    // Get the current location of the user using the Google Maps API
-    Geolocation.getCurrentPosition(
-      position => {
-        const { lat, long } = position.coords;
-        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=YOUR_API_KEY`;
-        axios.get(url).then(res => {
-          const address = "Emergency at SRM-KTR 404/405.Please reach ASAP.Help needed ";//res.data.results[0].formatted_address;
-          sendMessage(`Emergency at ${address}`, '+918920572883');
-        }).catch(error => {
-          console.log(error);
-        });
-      },
-      error => {
-        console.log(error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 1000,
-      },
-    );
+    // Send an SMS message with the user's location
+    sendMessage(`Emergency at ${location}`, 'MSG to be recived phn no');
   };
 
   return (
     <>
-    <View>
-      <EmergencyContacts1 />
-    </View>
-    <View style={styles.container}>
+      <View style={styles.container}>
         <PanicButton sendMessage={sendMessage} getCurrentLocation={getCurrentLocation} />
-    </View>
-    <View>
-      <EmergencyContacts />
-    </View>
+      </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'white',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    //backgroundImage: `url(${"./Code.png"})`, // Set the background image
+    //resizeMode: 'cover', // Make sure the image covers the entire background
   },
-  title : {
-    fontSize: 20,
-    color : "white",
-  }
+  container_Shre: {
+    backgroundColor: 'white',
+    flex: 1,
+    alignItems: 'left',
+    justifyContent: 'center',
+  },
+  container_Vansh: {
+    backgroundColor: 'black',
+    flex: 1,
+    alignItems: 'right',
+    justifyContent: 'center',
+  },
 });
